@@ -26,10 +26,68 @@
 </head>
 <body>
 
-<img src="https://ajlovechina.github.io/loveBalloon/static/music.png" style="position: fixed;z-index: 10001;top:10px;right:10px;" onclick="let m = document.querySelector('.song-audio-autoplay'); if (m.paused ) {m.play(); this.className = 'rotateImages'} else {m.pause(); this.className = ''}">
-<audio class="song-audio-autoplay" controls loop style="display: none;visibility: hidden">
+<img id="music-icon" src="https://ajlovechina.github.io/loveBalloon/static/music.png" style="position: fixed;z-index: 10001;top:10px;right:10px;cursor: pointer;" class="rotateImages">
+<audio id="bg-music" class="song-audio-autoplay" controls loop style="display: none;visibility: hidden">
     <source src="./index_files/music.mp3" type="audio/mp3"/>
 </audio>
+<script>
+(function() {
+    var audio = document.getElementById("bg-music");
+    var musicIcon = document.getElementById("music-icon");
+    var isPlaying = false;
+    
+    // 尝试自动播放
+    function attemptAutoplay() {
+        audio.play().then(function() {
+            isPlaying = true;
+            musicIcon.className = "rotateImages";
+        }).catch(function(error) {
+            console.log("自动播放被阻止，需要用户交互:", error);
+            // 添加点击事件监听器
+            document.addEventListener("click", function() {
+                if (!isPlaying) {
+                    audio.play().then(function() {
+                        isPlaying = true;
+                        musicIcon.className = "rotateImages";
+                    }).catch(function(e) {
+                        console.log("播放失败:", e);
+                    });
+                }
+            }, { once: true });
+        });
+    }
+    
+    // 页面加载后尝试自动播放
+    window.addEventListener("load", attemptAutoplay);
+    
+    // 音乐图标点击事件
+    musicIcon.addEventListener("click", function() {
+        if (isPlaying) {
+            audio.pause();
+            musicIcon.className = "";
+        } else {
+            audio.play().then(function() {
+                isPlaying = true;
+                musicIcon.className = "rotateImages";
+            }).catch(function(e) {
+                console.log("播放失败:", e);
+            });
+        }
+        isPlaying = !isPlaying;
+    });
+    
+    // 监听音频播放状态变化
+    audio.addEventListener("play", function() {
+        isPlaying = true;
+        musicIcon.className = "rotateImages";
+    });
+    
+    audio.addEventListener("pause", function() {
+        isPlaying = false;
+        musicIcon.className = "";
+    });
+})();
+</script>
 <style type="text/css">
     .rotateImages{
         -webkit-animation:myRotate 10s linear infinite;
